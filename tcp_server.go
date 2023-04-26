@@ -5,10 +5,11 @@ import (
 	"log"
 	"net"
 	"sync"
+
+	"github.com/Omarp321/is105sem03/mycrypt"
 )
 
 func main() {
-
 	var wg sync.WaitGroup
 
 	server, err := net.Listen("tcp", "172.17.0.3:16")
@@ -34,10 +35,12 @@ func main() {
 						if err != io.EOF {
 							log.Println(err)
 						}
-						return // fra for løkke
+						return
 					}
-					switch msg := string(buf[:n]); msg {
-  				        case "ping":
+					dekryptertMelding := mycrypt.Dekrypter([]rune(string(buf[:n])), mycrypt.ALF_SEM03, len(mycrypt.ALF_SEM03)-4)
+					log.Println("Dekrypter melding: ", string(dekryptertMelding))
+					switch msg := string(dekryptertMelding); msg {
+					case "ping":
 						_, err = c.Write([]byte("pong"))
 					default:
 						_, err = c.Write(buf[:n])
@@ -46,7 +49,7 @@ func main() {
 						if err != io.EOF {
 							log.Println(err)
 						}
-						return // fra for løkke
+						return
 					}
 				}
 			}(conn)
@@ -54,3 +57,4 @@ func main() {
 	}()
 	wg.Wait()
 }
+
